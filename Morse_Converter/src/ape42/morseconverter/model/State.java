@@ -15,11 +15,12 @@ public interface State {
 	CharSequence getValidationMessage();
 	CharSequence getResult();
 
-	boolean isInputValid();
+	boolean isValidData(String input);
 
-	void process(String input, Context context);
-
-	void validateInput(String input);
+	void processData(String input);
+	
     void setResult(CharSequence result);
+	boolean isValidCommand(String input);
+	void processCommand(String input);
 
 }

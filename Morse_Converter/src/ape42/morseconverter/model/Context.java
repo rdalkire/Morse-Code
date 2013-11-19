@@ -6,5 +6,6 @@ package ape42.morseconverter.model;
  * @author Dave Alkire
  */
 public interface Context {
+	State getState();
 	void setState(State state);
 }

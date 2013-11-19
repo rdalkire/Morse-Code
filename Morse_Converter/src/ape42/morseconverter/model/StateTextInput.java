@@ -8,8 +8,8 @@ package ape42.morseconverter.model;
  */
 public class StateTextInput implements State {
 
-    private CharSequence result;
-    private boolean valid;
+    private static final String CMD_MORSE = "M";
+	private CharSequence result;
     private Core core;
     
 	public StateTextInput(Core core) {
@@ -41,45 +41,46 @@ public class StateTextInput implements State {
 	}
 
 	@Override
-	public boolean isInputValid() {
-		return valid;
+	public boolean isValidData(String input) {
+		return !( "".equals(input.trim()) || input == null ); 
 	}
 
 	@Override
-	public void process(String input, Context context) {
+	public void processData(String input) {
 	    
-	    if(Core.isHlpQry(input)){
-            result = getHelp();
-        }else if("M".trim().equalsIgnoreCase(input)){
-            result = "Switching to morse input.";
-            State newState = new StateMorseInput(core);
-            newState.setResult( result );
-            context.setState( newState );
-        }else{
-            StringBuilder stringBuild = new StringBuilder();
-            String[] words = input.toUpperCase().split("\\s");
-            for(String word: words){
-                char[] chars = word.toCharArray();
-                for(char ch: chars){
-                    String key = Character.toString(ch);
-                    String mCode = core.getAlphaToMorse().get(key);
-                    if( mCode != null) stringBuild.append( mCode + " " );
-                }
-                stringBuild.append(" ");
-            }
-            result = stringBuild;
-        }
-	}
-
-	/* (not really applicable) */
-	@Override
-	public void validateInput(String input) {
-	    valid = !( "".equals(input.trim()) || input == null );
+		StringBuilder stringBuild = new StringBuilder();
+		String[] words = input.toUpperCase().split("\\s");
+		for(String word: words){
+			char[] chars = word.toCharArray();
+			for(char ch: chars){
+				String key = Character.toString(ch);
+				String mCode = core.getAlphaToMorse().get(key);
+				if( mCode != null) stringBuild.append( mCode + " " );
+			}
+			stringBuild.append(" ");
+		}
+		result = stringBuild;
+        
 	}
 
     @Override
     public void setResult(CharSequence result) {
         this.result = result;
     }
+
+	@Override
+	public boolean isValidCommand(String input) {
+		return CMD_MORSE.trim().equalsIgnoreCase(input);
+	}
+
+	@Override
+	public void processCommand(String input) {
+		if(CMD_MORSE.trim().equalsIgnoreCase(input)){
+			result = "Switching to morse input.";
+			State newState = new StateMorseInput(core);
+			newState.setResult( result );
+			core.getContext().setState( newState );
+		}
+	}
 
 }

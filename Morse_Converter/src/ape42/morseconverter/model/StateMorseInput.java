@@ -9,8 +9,8 @@ import java.util.Set;
  */
 public class StateMorseInput implements State {
 
+	private static final String CMD_TEXT = "T";
 	private CharSequence result;
-    private boolean inputIsValid;
     private Core core;
 
     public StateMorseInput(Core core) {
@@ -47,63 +47,58 @@ public class StateMorseInput implements State {
 	}
 
 	@Override
-	public CharSequence getValidationMessage() {
-		return "Morse code please:  dots, dashes and spaces.";
-	}
-
-	@Override
 	public CharSequence getResult() {
 		return result;
 	}
 
 	@Override
-	public boolean isInputValid() {
-		return inputIsValid;
+	public CharSequence getValidationMessage() {
+		return "Morse code please:  dots, dashes and spaces.";
 	}
 
 	@Override
-	public void process(String input, Context context) {
-
-        if(Core.isHlpQry(input)){
-            result = getHelp();
-        }else if("T".trim().equalsIgnoreCase(input)){
-            result = "Switching to text input.";
-            State newState = new StateTextInput( core );
-            newState.setResult(result);
-            context.setState( newState );
-        }else{
-            StringBuilder strBld = new StringBuilder();
-            String[] mWords = input.split("\\s{2}");
-            for(String mWord: mWords){
-                String[] mCodes = mWord.split("\\s");
-                for(String mCode: mCodes){
-                    String ltr = core.getMorseToAlpha().get(mCode);
-                    if(ltr == null){
-                        strBld.append("(?)");
-                    }else{
-                        strBld.append(ltr);
-                    }
-                    
-                }
-                strBld.append(" ");
-            }
-            result = strBld;
-        }
+	public boolean isValidCommand(String input) {
+		return CMD_TEXT.equalsIgnoreCase(input);
 	}
 
 	@Override
-	public void validateInput(String input) {
-		// Checks that it's H or T, or all dits, dahs and spaces
-	    if("H".equalsIgnoreCase(input) || "T".equalsIgnoreCase(input) ){
-	        inputIsValid = true;
-	    }else if( input.matches("[\\.\\-\\s]+") ){
-	        inputIsValid = true;
-	    }else{
-	        inputIsValid = false;
-	    }
+	public boolean isValidData(String input) {
+		return input.matches("[\\.\\-\\s]+");
+	}
+
+	@Override
+	public void processCommand( String input ) {
+		if(CMD_TEXT.trim().equalsIgnoreCase(input)){
+			result = "Switching to text input.";
+			State newState = new StateTextInput( core );
+			newState.setResult(result);
+			core.getContext().setState( newState );
+		}
 	}
 
     @Override
+	public void processData(String input) {
+
+    	StringBuilder strBld = new StringBuilder();
+    	String[] mWords = input.split("\\s{2}");
+    	for(String mWord: mWords){
+    		String[] mCodes = mWord.split("\\s");
+    		for(String mCode: mCodes){
+    			String ltr = core.getMorseToAlpha().get(mCode);
+    			if(ltr == null){
+    				strBld.append("(?)");
+    			}else{
+    				strBld.append(ltr);
+    			}
+
+    		}
+    		strBld.append(" ");
+    	}
+    	result = strBld;
+        
+	}
+
+	@Override
     public void setResult(CharSequence result) {
         this.result = result;
     }

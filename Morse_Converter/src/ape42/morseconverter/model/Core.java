@@ -11,12 +11,16 @@ public class Core {
 
     private Map<String, String> alphaToMorse;
     private Map<String, String> morseToAlpha;
+	private Context context;
     
 	public static boolean isHlpQry(String input) {
 		return "H".equalsIgnoreCase(input);
 	}
 
-	public Core(){
+	public Core(Context context){
+
+	    this.setContext(context);
+	    
 	    alphaToMorse = new LinkedHashMap<String, String>();
 	    alphaToMorse.put("A", ".-");
 	    alphaToMorse.put("B", "-...");
@@ -60,11 +64,35 @@ public class Core {
 	    for( String alphKey: alphaToMorse.keySet() ){
 	        morseToAlpha.put(alphaToMorse.get(alphKey), alphKey );
 	    }
+	    
 	}
+
 	public Map<String, String> getAlphaToMorse(){
 	    return alphaToMorse;
 	}
 	public Map<String, String> getMorseToAlpha(){
 	    return morseToAlpha;
 	}
+
+	public Context getContext() {
+		return context;
+	}
+
+	public void setContext(Context context) {
+		this.context = context;
+	}
+
+	public boolean isValidCommand(String input) {
+		return isHlpQry(input) || context.getState().isValidCommand(input); 
+	}
+
+	public void processCommand(String input) {
+		State state = context.getState();
+		if ( isHlpQry(input) ){
+			state.setResult(state.getHelp());
+		}else{
+			state.processCommand(input);
+		}
+	}
+
 }
